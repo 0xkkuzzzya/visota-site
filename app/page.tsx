@@ -374,7 +374,7 @@ export default function Home() {
         </section>
 
         <section className="works-section page-section" id="works">
-          <div className="section-shell works-heading"><SectionHeading dark="Примеры" blue="установленных потолков" /></div>
+          <div className="section-shell works-heading"><SectionHeading dark="Дизайнерские" blue="проекты" /></div>
           <div
             className="works-viewport"
             ref={worksViewportRef}

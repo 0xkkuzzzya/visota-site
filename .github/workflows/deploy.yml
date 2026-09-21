@@ -1,0 +1,63 @@
+name: Deploy to NetAngels
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SERVER_KNOWN_HOSTS: ${{ secrets.SERVER_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SERVER_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Upload application files
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+        run: |
+          rsync -az --delete \
+            --exclude='.git/' \
+            --exclude='.env*' \
+            --exclude='node_modules/' \
+            --exclude='dist/' \
+            --exclude='outputs/' \
+            -e "ssh -i ~/.ssh/id_ed25519" \
+            ./ "$SERVER_USER@$SERVER_HOST:npvisota.na4u.ru/app/"
+
+      - name: Build and restart application
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+        run: |
+          ssh -i ~/.ssh/id_ed25519 "$SERVER_USER@$SERVER_HOST" 'bash -s' <<'REMOTE'
+            set -e
+            export NVM_DIR="$HOME/.nvm"
+            . "$NVM_DIR/nvm.sh"
+            nvm use default
+            cd "$HOME/npvisota.na4u.ru/app"
+            npm ci --no-audit --no-fund
+            npm run build
+            touch "$HOME/npvisota.na4u.ru/reload"
+          REMOTE

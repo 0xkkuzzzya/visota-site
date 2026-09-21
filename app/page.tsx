@@ -1,6 +1,7 @@
 "use client";
 
 import { ChangeEvent, CSSProperties, FormEvent, KeyboardEvent, PointerEvent, useCallback, useEffect, useRef, useState } from "react";
+import { reachMetrikaGoal } from "./CookieConsent";
 
 const contactPhone = {
   label: "8 900 208 21 01",
@@ -101,6 +102,7 @@ function PhoneInput({ id, label }: { id: string; label: string }) {
       id={id}
       name="phone"
       type="tel"
+      className="ym-disable-keys"
       value={value}
       onChange={handleChange}
       onKeyDown={handleKeyDown}
@@ -156,6 +158,7 @@ async function submitLead(
     });
 
     if (!response.ok) throw new Error("Lead submission failed");
+    reachMetrikaGoal("lead_success");
     form.reset();
     setStatus("success");
   } catch {
@@ -335,7 +338,7 @@ export default function Home() {
               <p className="hero-lead">Производство и комплектующие.<br />Бесплатный замер. Монтаж под ключ.</p>
               <form className="hero-form" onSubmit={(event) => submitLead(event, setHeroLeadStatus)}>
                 <div className="form-row">
-                  <label><span className="sr-only">Ваше имя</span><input name="name" placeholder="Ваше имя" autoComplete="name" minLength={2} maxLength={100} required /></label>
+                  <label><span className="sr-only">Ваше имя</span><input className="ym-disable-keys" name="name" placeholder="Ваше имя" autoComplete="name" minLength={2} maxLength={100} required /></label>
                   <label htmlFor="hero-phone"><span className="sr-only">Ваш телефон</span><PhoneInput id="hero-phone" label="Ваш телефон" /></label>
                   <button className="primary-button" type="submit" disabled={heroLeadStatus === "submitting"}>{heroLeadStatus === "submitting" ? "Отправляем…" : "Заказать"}</button>
                 </div>
@@ -374,7 +377,7 @@ export default function Home() {
         </section>
 
         <section className="works-section page-section" id="works">
-          <div className="section-shell works-heading"><SectionHeading dark="Дизайнерские" blue="проекты" /></div>
+          <div className="section-shell works-heading"><SectionHeading dark="Дизайнерские" blue="потолки" /></div>
           <div
             className="works-viewport"
             ref={worksViewportRef}
@@ -472,7 +475,7 @@ export default function Home() {
         <div className="footer-lead-wrap">
           <form className="footer-lead section-shell" onSubmit={(event) => submitLead(event, setFooterLeadStatus)}>
             <div className="footer-lead-copy"><h2>Остались вопросы?</h2><p>Оставьте заявку и мы свяжемся с вами<br />удобным способом</p></div>
-            <label><span className="sr-only">Ваше имя</span><input name="name" placeholder="Ваше имя" autoComplete="name" minLength={2} maxLength={100} required /></label>
+            <label><span className="sr-only">Ваше имя</span><input className="ym-disable-keys" name="name" placeholder="Ваше имя" autoComplete="name" minLength={2} maxLength={100} required /></label>
             <label htmlFor="footer-phone"><span className="sr-only">Телефон</span><PhoneInput id="footer-phone" label="Телефон" /></label>
             <button className="primary-button" type="submit" disabled={footerLeadStatus === "submitting"}>{footerLeadStatus === "submitting" ? "Отправляем…" : "Отправить заявку"}</button>
             <PrivacyConsent />
@@ -589,7 +592,7 @@ function OrderModal({ open, onClose, tariff }: { open: boolean; onClose: () => v
         <p>Оставьте контакты — согласуем удобное время и бесплатно подготовим точный расчёт.</p>
         {tariff && <p className="modal-tariff">Выбранный тариф: <strong>{tariff}</strong></p>}
         <form onSubmit={(event) => submitLead(event, setLeadStatus, tariff)}>
-          <label><span className="sr-only">Ваше имя</span><input ref={firstFieldRef} name="name" placeholder="Ваше имя" autoComplete="name" minLength={2} maxLength={100} required /></label>
+          <label><span className="sr-only">Ваше имя</span><input className="ym-disable-keys" ref={firstFieldRef} name="name" placeholder="Ваше имя" autoComplete="name" minLength={2} maxLength={100} required /></label>
           <label htmlFor="modal-phone"><span className="sr-only">Ваш телефон</span><PhoneInput id="modal-phone" label="Ваш телефон" /></label>
           <PrivacyConsent />
           <button className="primary-button" type="submit" disabled={leadStatus === "submitting"}>{leadStatus === "submitting" ? "Отправляем…" : "Заказать замерщика"}</button>

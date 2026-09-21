@@ -29,6 +29,7 @@ test("server-renders the complete Vysota landing page", async () => {
   assert.match(html, /<title>Высота — натяжные потолки в Екатеринбурге<\/title>/i);
   assert.match(html, /Натяжные потолки/);
   assert.match(html, /Цены на/);
+  assert.match(html, /Дизайнерские<\/span>\s*<em>потолки/);
   assert.match(html, /Отзывы/);
   assert.match(html, /Визуализация потолка/);
   assert.match(html, /8 900 208 21 01/);
@@ -55,11 +56,14 @@ test("publishes the personal data policy", async () => {
 });
 
 test("keeps the required interactions and removes starter UI", async () => {
-  const [page, css, leadsRoute, packageJson] = await Promise.all([
+  const [page, css, leadsRoute, packageJson, metrika, layout, privacy] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/api/leads/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
+    readFile(new URL("../app/CookieConsent.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/privacy/page.tsx", import.meta.url), "utf8"),
   ]);
 
   assert.match(page, /setInterval\([\s\S]*5000/);
@@ -77,6 +81,15 @@ test("keeps the required interactions and removes starter UI", async () => {
   assert.match(css, /@keyframes review-right/);
   assert.match(css, /@keyframes review-left/);
   assert.match(css, /height:\s*628px/);
+  assert.match(page, /reachMetrikaGoal\("lead_success"\)/);
+  assert.match(page, /ym-disable-keys/);
+  assert.match(metrika, /111044986/);
+  assert.match(metrika, /webvisor:\s*true/);
+  assert.match(metrika, /initializeYandexMetrika\(\);/);
+  assert.match(metrika, /Понятно/);
+  assert.doesNotMatch(metrika, /Только необходимые/);
+  assert.match(layout, /<CookieConsent \/>/);
+  assert.match(privacy, /Яндекс Метрика/);
   assert.doesNotMatch(page, /href=["']#/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 
